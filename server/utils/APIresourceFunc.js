@@ -23,7 +23,7 @@ class APIresourceFunc {
     //Sort the query
     if (this.queryString.sort) {
       //sort(filed1, field2..)
-      const sortBy = this.queryString.sort.split(',').join('');
+      const sortBy = this.queryString.sort.split(',').join(' ');
       this.query = this.query.sort(sortBy);
     } else {
       this.query = this.query.sort('-date_created');

@@ -1,10 +1,20 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+
+process.on('uncaughtException', err => {
+  console.log(`Error name: ${err.name}, Error message ${err.message}`);
+  process.exit(1);
+});
+
 const server = require('./app');
 dotenv.config({ path: './config.env' });
 
+const dbConnect = process.env.DATABASE.replace(
+  '<PASSWORD>',
+  process.env.DATABASE_PASSWORD
+);
 mongoose
-  .connect(process.env.DATABASE_LOCAL, {
+  .connect(dbConnect, {
     useNewUrlParser: true,
     useCreateIndex: true,
     useFindAndModify: false,
@@ -15,6 +25,13 @@ mongoose
   });
 // START SERVER
 const port = process.env.PORT || 3000;
-server.listen(port, () => {
-  console.log(`Afroorig now running on port ${port}...`);
+const afroFarmServer = server.listen(port, () => {
+  console.log(`AfroFarm now running on port ${port}...`);
+});
+
+process.on('unhandledRejection', err => {
+  console.log(`Error name: {err.name}, Error message ${err.message}`);
+  afroFarmServer.close(() => {
+    process.exit(1);
+  });
 });
