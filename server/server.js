@@ -30,7 +30,7 @@ const afroFarmServer = server.listen(port, () => {
 });
 
 process.on('unhandledRejection', err => {
-  console.log(`Error name: {err.name}, Error message ${err.message}`);
+  console.log(`Error name: ${err.name}, Error message ${err.message}`);
   afroFarmServer.close(() => {
     process.exit(1);
   });
