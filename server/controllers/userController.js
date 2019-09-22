@@ -3,6 +3,13 @@ const APIresourceFunc = require('../utils/APIresourceFunc');
 const catchAsyncFunc = require('../utils/catchAsyncFuncs');
 const AppError = require('../utils/appError');
 
+const filterInputObj = (obj, ...allowedFields) => {
+  const newInputsObj = {};
+  Object.keys(obj).forEach(el => {
+    if (allowedFields.includes(el)) newInputsObj[el] = obj[el];
+  });
+  return newInputsObj;
+};
 exports.createUser = catchAsyncFunc(async (req, res, next) => {
   const newUser = await User.create(req.body);
   res.status(201).send({
@@ -13,6 +20,41 @@ exports.createUser = catchAsyncFunc(async (req, res, next) => {
   });
 });
 
+exports.updateCurrentUser = catchAsyncFunc(async (req, res, next) => {
+  // User cannot update password
+  if (req.body.user_password || req.body.user_Confirmpassword) {
+    return next(
+      new AppError('You cannot update password using this route', 400)
+    );
+  }
+  // update user document
+  const filteredInputsBody = filterInputObj(
+    req.body,
+    'user_firstname',
+    'user_lastname',
+    'user_email_address'
+  );
+  const updatedUser = await User.findByIdAndUpdate(
+    req.user.id,
+    filteredInputsBody,
+    { new: true, runValidators: true }
+  );
+  res.status(200).json({
+    status: 'success',
+    data: {
+      user: updatedUser
+    }
+  });
+});
+
+exports.deleteCurrentUser = catchAsyncFunc(async (req, res, next) => {
+  await User.findByIdAndUpdate(req.user.id, { is_active: false });
+
+  res.status(204).json({
+    status: 'success',
+    data: null
+  });
+});
 exports.getUsers = catchAsyncFunc(async (req, res, next) => {
   //EXECUTE A QUERY
   const apiHelpers = new APIresourceFunc(User.find(), req.query)

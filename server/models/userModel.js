@@ -56,8 +56,19 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Date is neccessary'],
     default: Date.now()
   },
-  passwordResetToken: String,
-  passwordResetExpire: Date
+  passwordResetToken: {
+    type: String,
+    select: false
+  },
+  passwordResetExpire: {
+    type: Date,
+    select: false
+  },
+  is_active: {
+    type: Boolean,
+    default: true,
+    select: false
+  }
 });
 
 userSchema.pre('save', function(next) {
@@ -76,6 +87,10 @@ userSchema.pre('save', function(next) {
   });
 });
 
+userSchema.pre(/^find/, function(next) {
+  this.find({ is_active: { $ne: false } });
+  next();
+});
 userSchema.pre('save', function(next) {
   if (!this.isModified('user_password') || this.isNew) return next();
 

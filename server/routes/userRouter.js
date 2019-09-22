@@ -14,7 +14,16 @@ router.patch(
   authController.protect,
   authController.updatePassword
 );
-
+router.patch(
+  '/update-current-user',
+  authController.protect,
+  userController.updateCurrentUser
+);
+router.delete(
+  '/delete-current-user',
+  authController.protect,
+  userController.deleteCurrentUser
+);
 router
   .route('/')
   .get(authController.protect, userController.getUsers)
@@ -28,6 +37,10 @@ router
     authController.restrictTo('admin'),
     userController.deleteUser
   )
-  .patch(userController.updateUser);
+  .patch(
+    authController.protect,
+    authController.restrictTo('admin'),
+    userController.updateUser
+  );
 
 module.exports = router;
